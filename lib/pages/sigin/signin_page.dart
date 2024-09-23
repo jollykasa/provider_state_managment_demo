@@ -12,6 +12,7 @@ class _SigninPageState extends State<SigninPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  bool passwordKey = true;
 
   @override
   Widget build(BuildContext context) {
@@ -75,25 +76,49 @@ class _SigninPageState extends State<SigninPage> {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter the Email';
                                   }
+                                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                      .hasMatch(value)) {
+                                    return 'Please enter a valid Email';
+                                  }
                                 },
                               ),
                               const SizedBox(height: 10),
                               TextFormField(
                                 controller: password,
-                                decoration: const InputDecoration(
+                                obscureText: passwordKey,
+                                decoration: InputDecoration(
                                     labelText: 'Password',
-                                    suffixIcon: Icon(Icons.key),
-                                    border: OutlineInputBorder(
+                                    suffixIcon: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                             passwordKey=!passwordKey;
+                                          });
+                                        },
+                                        icon: passwordKey
+                                            ? const Icon(Icons.visibility)
+                                            : const Icon(Icons.visibility_off)),
+                                    border: const OutlineInputBorder(
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(5)))),
+                                validator: (value){
+                                  if(value== null || value.isEmpty){
+                                    return 'Please enter password';
+                                  }
+                                  if((value.length)!<3){
+                                    return 'Password should be more than 3 digits';
+                                  }
+                                },
                               ),
                               const SizedBox(height: 10),
                               ElevatedButton(
                                   onPressed: () {
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => HomePage()));
+                                    if (_formKey.currentState!.validate()) {
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const HomePage()));
+                                    }
                                   },
                                   style: const ButtonStyle(
                                       backgroundColor:

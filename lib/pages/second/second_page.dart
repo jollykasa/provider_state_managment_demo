@@ -14,10 +14,14 @@ class SecondPage extends StatelessWidget {
         ),
         body: Column(
           children: [
-            const Hero(
-                tag: 'second',
-                child:
-                    Text("Second Page", style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold))),
+            Hero(
+              tag: 'logo',
+              child: Container(
+                color: Colors.blue,
+                  child: Image.asset(
+                'assets/images/logo.png',
+              )),
+            ),
             Text(
               numberlistProvider.numbers.last.toString(),
               style: const TextStyle(fontSize: 20),

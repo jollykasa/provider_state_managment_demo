@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:provider_state_management/pages/home/home_page.dart';
+import 'package:provider_state_management/provider/auth_provider.dart';
 
 class SigninPage extends StatefulWidget {
   const SigninPage({super.key});
@@ -12,7 +14,8 @@ class _SigninPageState extends State<SigninPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
-  bool passwordKey = true;
+  bool isObscure = true;
+  bool isLogin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -60,74 +63,107 @@ class _SigninPageState extends State<SigninPage> {
                             style: TextStyle(
                                 fontSize: 30, fontWeight: FontWeight.w500)),
                         const SizedBox(height: 10),
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                controller: email,
-                                decoration: const InputDecoration(
-                                    labelText: 'Email',
-                                    suffixIcon: Icon(Icons.person),
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(5)))),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter the Email';
-                                  }
-                                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                      .hasMatch(value)) {
-                                    return 'Please enter a valid Email';
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              TextFormField(
-                                controller: password,
-                                obscureText: passwordKey,
-                                decoration: InputDecoration(
-                                    labelText: 'Password',
-                                    suffixIcon: IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                             passwordKey=!passwordKey;
-                                          });
-                                        },
-                                        icon: passwordKey
-                                            ? const Icon(Icons.visibility)
-                                            : const Icon(Icons.visibility_off)),
-                                    border: const OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(5)))),
-                                validator: (value){
-                                  if(value== null || value.isEmpty){
-                                    return 'Please enter password';
-                                  }
-                                  if((value.length)!<3){
-                                    return 'Password should be more than 3 digits';
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              ElevatedButton(
-                                  onPressed: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const HomePage()));
+                        Consumer<AuthProvider>(
+                          builder: (context, authProvider, child) => Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  controller: email,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Email',
+                                      suffixIcon: Icon(Icons.person),
+                                      border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(5)))),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter the Email';
+                                    }
+                                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                        .hasMatch(value)) {
+                                      return 'Please enter a valid Email';
                                     }
                                   },
-                                  style: const ButtonStyle(
-                                      backgroundColor:
-                                          WidgetStatePropertyAll(Colors.blue)),
-                                  child: const Text(
-                                    "Sign In",
-                                    style: TextStyle(color: Colors.white),
-                                  ))
-                            ],
+                                ),
+                                const SizedBox(height: 10),
+                                TextFormField(
+                                  controller: password,
+                                  obscureText: isObscure,
+                                  decoration: InputDecoration(
+                                      labelText: 'Password',
+                                      suffixIcon: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              isObscure = !isObscure;
+                                            });
+                                          },
+                                          icon: isObscure
+                                              ? const Icon(Icons.visibility)
+                                              : const Icon(
+                                                  Icons.visibility_off)),
+                                      border: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(5)))),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter password';
+                                    }
+                                    if ((value.length)! < 3) {
+                                      return 'Password should be more than 3 digits';
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        isLogin
+                                            ? authProvider.signIn(
+                                                email.text, password.text)
+                                            : authProvider.signUp(
+                                                email.text, password.text);
+                                        isLogin
+                                            ? Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const HomePage()))
+                                            : setState(() {
+                                                isLogin = true;
+                                              });
+                                        ;
+                                      }
+                                    },
+                                    style: const ButtonStyle(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                            Colors.blue)),
+                                    child: isLogin
+                                        ? const Text(
+                                            "Sign In",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          )
+                                        : const Text(
+                                            "Sign Up",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          )),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isLogin = !isLogin;
+                                      });
+                                    },
+                                    child: isLogin
+                                        ? const Text(
+                                            "Don't have an account signUp? SignUp")
+                                        : const Text("Already sign In? Login"))
+                              ],
+                            ),
                           ),
                         ),
                       ],
